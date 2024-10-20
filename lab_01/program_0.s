@@ -7,18 +7,18 @@
         
     .data
 v1:     .byte 2, 6, -3, 11, 9, 18, -13, 16, 5, 1
-v2:     .byte 4, 2, 13, 3, 9, 9, 7, 16, 4, 7
+v2:     .byte 4, 2, -13, 3, 9, 9, 7, 16, 4, 7
 v3:     .space 10    
-flag1:  .byte 0
+flag1:  .byte 1
 flag2:  .byte 1
 flag3:  .byte 1
 
 		.text
 main: 
     xor r1,r1,r1
+    xor r2,r2,r2
     xor r5,r5,r5                        ; index of v3
     daddui r3,r0,10
-    daddui r10,r0,1
 
 outer_loop:
     lb r15,v1(r1)
@@ -58,7 +58,7 @@ false:
     bne r1,r3, outer_loop
 
     beqz r5, pre_fine
-    sb r10,flag1(r0)
+    sb r0,flag1(r0)
     j fine
 pre_fine:
     sb r0,flag2(r0)
