@@ -37,11 +37,13 @@ main:
     l.d     f8,a(r0)        ; load a in f8
 
 loop:
-    daddi   r1,r1,-8
     daddi   r2,r2,-1
-    l.d     f1,v1(r1)
 else:
     dmul    r11,r11,r2
+    daddi   r1,r1,-8
+    l.d     f1,v1(r1)
+    l.d     f2,v2(r1)
+    l.d     f3,v3(r1)
     mtc1    r11,f7
     cvt.d.l f7,f7
     mul.d   f8,f1,f7        ; a = v1[i] * ((double)m * i)
@@ -50,8 +52,6 @@ then:
     cvt.l.d f9,f8
     mfc1    r11,f9          ; m = (int) a
 
-    l.d     f2,v2(r1)
-    l.d     f3,v3(r1)
     mul.d   f4,f8,f1
     sub.d   f4,f4,f2        ; v4[i] = a * v1[i] - v2[i]
     div.d   f5,f4,f3
@@ -64,11 +64,13 @@ then:
 
 ;   UNROLL 2
 
-    daddi   r1,r1,-8
     daddi   r2,r2,-1
-    l.d     f1,v1(r1)
 else2:
     dmul    r11,r11,r2
+    daddi   r1,r1,-8
+    l.d     f1,v1(r1)
+    l.d     f2,v2(r1)
+    l.d     f3,v3(r1)
     mtc1    r11,f7
     cvt.d.l f7,f7
     mul.d   f8,f1,f7        ; a = v1[i] * ((double)m * i)
@@ -77,8 +79,6 @@ then2:
     cvt.l.d f9,f8
     mfc1    r11,f9          ; m = (int) a
 
-    l.d     f2,v2(r1)
-    l.d     f3,v3(r1)
     mul.d   f4,f8,f1
     sub.d   f4,f4,f2        ; v4[i] = a * v1[i] - v2[i]
     div.d   f5,f4,f3
@@ -92,21 +92,20 @@ then2:
 
 ;   UNROLL 3
 
-    daddi   r1,r1,-8
     daddi   r2,r2,-1
+    daddi   r1,r1,-8
     l.d     f1,v1(r1)
 if:
     dsllv   r11,r11,r2      ; shift m left by i
     mtc1    r11,f7
     cvt.d.l f7,f7
     div.d   f8,f1,f7        ; a = v1[i] / ((double)m << i)
-
+    l.d     f2,v2(r1)
+    l.d     f3,v3(r1)
 then3:
     cvt.l.d f9,f8
     mfc1    r11,f9          ; m = (int) a
 
-    l.d     f2,v2(r1)
-    l.d     f3,v3(r1)
     mul.d   f4,f8,f1
     sub.d   f4,f4,f2        ; v4[i] = a * v1[i] - v2[i]
     div.d   f5,f4,f3
