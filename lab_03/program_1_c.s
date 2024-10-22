@@ -37,116 +37,86 @@ main:
     l.d     f8,a(r0)        ; load a in f8
 
 loop:
-    daddi   r2,r2,-1
-    ddiv    r4,r2,r3        ; check if the index is divisible by 3
-    dmul    r13,r11,r2      ; m * i (r13 = m * i)
-    dsllv   r12,r11,r2      ; shift m left by i (r12 = m << i)
     daddi   r1,r1,-8
+    daddi   r2,r2,-1
     l.d     f1,v1(r1)
-    mtc1    r13,f12
-    mtc1    r12,f11
-    l.d     f2,v2(r1)
-    l.d     f3,v3(r1)
-    dmul    r4,r4,r3        ; recalculate the index with the division result
-    cvt.d.l f12,f12           ; convert the result to double precision
-    cvt.d.l f11,f11           ; convert the result to double precision
-    bne     r4,r2,else      ; if it is not divisible by 3, jump to 'else'
-    nop
-
-    div.d   f8,f1,f11        ; a = v1[i] / ((double)m << i)
-    j       then
-    nop
 else:
-    mul.d   f8,f1,f12        ; a = v1[i] * ((double)m * i)
+    dmul    r11,r11,r2
+    mtc1    r11,f7
+    cvt.d.l f7,f7
+    mul.d   f8,f1,f7        ; a = v1[i] * ((double)m * i)
+
 then:
     cvt.l.d f9,f8
     mfc1    r11,f9          ; m = (int) a
 
+    l.d     f2,v2(r1)
+    l.d     f3,v3(r1)
     mul.d   f4,f8,f1
     sub.d   f4,f4,f2        ; v4[i] = a * v1[i] - v2[i]
     div.d   f5,f4,f3
-    s.d     f4,v4(r1)
     sub.d   f5,f5,f10       ; v5[i] = v4[i] / v3[i] - b
     sub.d   f6,f4,f1
     mul.d   f6,f6,f5        ; v6[i] = (v4[i] - v1[i]) * v5[i]
+    s.d     f4,v4(r1)
     s.d     f5,v5(r1)
-    beqz    r2,fine
     s.d     f6,v6(r1)
 
 ;   UNROLL 2
 
-    daddi   r2,r2,-1
-    ddiv    r4,r2,r3        ; check if the index is divisible by 3
-    dmul    r13,r11,r2      ; m * i (r13 = m * i)
-    dsllv   r12,r11,r2      ; shift m left by i (r12 = m << i)
     daddi   r1,r1,-8
+    daddi   r2,r2,-1
     l.d     f1,v1(r1)
-    mtc1    r13,f12
-    mtc1    r12,f11
-    l.d     f2,v2(r1)
-    l.d     f3,v3(r1)
-    dmul    r4,r4,r3        ; recalculate the index with the division result
-    cvt.d.l f12,f12           ; convert the result to double precision
-    cvt.d.l f11,f11           ; convert the result to double precision
-    bne     r4,r2,else2      ; if it is not divisible by 3, jump to 'else'
-    nop
-
-    div.d   f8,f1,f11        ; a = v1[i] / ((double)m << i)
-    j       then2
-    nop
 else2:
-    mul.d   f8,f1,f12        ; a = v1[i] * ((double)m * i)
+    dmul    r11,r11,r2
+    mtc1    r11,f7
+    cvt.d.l f7,f7
+    mul.d   f8,f1,f7        ; a = v1[i] * ((double)m * i)
+
 then2:
     cvt.l.d f9,f8
     mfc1    r11,f9          ; m = (int) a
 
+    l.d     f2,v2(r1)
+    l.d     f3,v3(r1)
     mul.d   f4,f8,f1
     sub.d   f4,f4,f2        ; v4[i] = a * v1[i] - v2[i]
     div.d   f5,f4,f3
-    s.d     f4,v4(r1)
     sub.d   f5,f5,f10       ; v5[i] = v4[i] / v3[i] - b
     sub.d   f6,f4,f1
     mul.d   f6,f6,f5        ; v6[i] = (v4[i] - v1[i]) * v5[i]
+    s.d     f4,v4(r1)
     s.d     f5,v5(r1)
     beqz    r2,fine
     s.d     f6,v6(r1)
 
 ;   UNROLL 3
 
-    daddi   r2,r2,-1
-    ddiv    r4,r2,r3        ; check if the index is divisible by 3
-    dmul    r13,r11,r2      ; m * i (r13 = m * i)
-    dsllv   r12,r11,r2      ; shift m left by i (r12 = m << i)
     daddi   r1,r1,-8
+    daddi   r2,r2,-1
     l.d     f1,v1(r1)
-    mtc1    r13,f12
-    mtc1    r12,f11
-    l.d     f2,v2(r1)
-    l.d     f3,v3(r1)
-    dmul    r4,r4,r3        ; recalculate the index with the division result
-    cvt.d.l f12,f12           ; convert the result to double precision
-    cvt.d.l f11,f11           ; convert the result to double precision
-    bne     r4,r2,else3      ; if it is not divisible by 3, jump to 'else'
-    nop
+if:
+    dsllv   r11,r11,r2      ; shift m left by i
+    mtc1    r11,f7
+    cvt.d.l f7,f7
+    div.d   f8,f1,f7        ; a = v1[i] / ((double)m << i)
 
-    div.d   f8,f1,f11        ; a = v1[i] / ((double)m << i)
-    j       then3
-    nop
-else3:
-    mul.d   f8,f1,f12        ; a = v1[i] * ((double)m * i)
 then3:
     cvt.l.d f9,f8
     mfc1    r11,f9          ; m = (int) a
 
+    l.d     f2,v2(r1)
+    l.d     f3,v3(r1)
     mul.d   f4,f8,f1
     sub.d   f4,f4,f2        ; v4[i] = a * v1[i] - v2[i]
     div.d   f5,f4,f3
-    s.d     f4,v4(r1)
     sub.d   f5,f5,f10       ; v5[i] = v4[i] / v3[i] - b
     sub.d   f6,f4,f1
     mul.d   f6,f6,f5        ; v6[i] = (v4[i] - v1[i]) * v5[i]
+    s.d     f4,v4(r1)
     s.d     f5,v5(r1)
-    bnez    r2,loop
+
+    j loop
     s.d     f6,v6(r1)
 
 fine:
